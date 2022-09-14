@@ -15,9 +15,7 @@ class SongsHandler {
   async postSongHandler (request, h) {
     try {
       this._validator.validateSongPayload(request.payload)
-      const { title = 'untitled', year, genre, performer, duration, albumId } = request.payload
-
-      const songId = await this._service.addSong({ title, year, genre, performer, duration, albumId })
+      const songId = await this._service.addSong(request.payload)
 
       const response = h.response({
         status: 'success',
@@ -30,12 +28,7 @@ class SongsHandler {
       return response
     } catch (error) {
       if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message
-        })
-        response.code(error.statusCode)
-        return response
+        return error
       }
 
       const response = h.response({
@@ -48,14 +41,31 @@ class SongsHandler {
     }
   }
 
-  async getSongsHandler (request) {
-    const { title, performer } = request.query
-    const songs = await this._service.getSongs(title, performer)
-    return {
-      status: 'success',
-      data: {
-        songs
+  async getSongsHandler (request, h) {
+    try {
+      const { title, performer } = request.query
+      const songs = await this._service.getSongs(title, performer)
+
+      const response = h.response({
+        status: 'success',
+        data: {
+          songs
+        }
+      })
+      response.code(200)
+      return response
+    } catch (error) {
+      if (error instanceof ClientError) {
+        return error
       }
+      
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.'
+      })
+      response.code(500)
+      console.error(error)
+      return response
     }
   }
 
@@ -71,12 +81,7 @@ class SongsHandler {
       }
     } catch (error) {
       if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message
-        })
-        response.code(error.statusCode)
-        return response
+        return error
       }
 
       const response = h.response({
@@ -102,12 +107,7 @@ class SongsHandler {
       }
     } catch (error) {
       if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message
-        })
-        response.code(error.statusCode)
-        return response
+        return error
       }
 
       const response = h.response({
@@ -131,12 +131,7 @@ class SongsHandler {
       }
     } catch (error) {
       if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message
-        })
-        response.code(error.statusCode)
-        return response
+        return error
       }
 
       const response = h.response({
