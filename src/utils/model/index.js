@@ -15,7 +15,7 @@ const songsModel = ({
   genre,
   performer,
   duration,
-  albumId
+  album_id
 }) => ({
   id,
   title,
@@ -23,7 +23,17 @@ const songsModel = ({
   genre,
   performer,
   duration,
-  albumId
+  albumId: album_id
 })
 
-module.exports = { albumsModel, songsModel }
+const playlistsModel = ({
+  id,
+  name,
+  username
+}) => ({
+  id,
+  name,
+  username
+})
+
+module.exports = { albumsModel, songsModel, playlistsModel }

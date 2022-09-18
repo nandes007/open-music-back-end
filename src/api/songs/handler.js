@@ -58,7 +58,7 @@ class SongsHandler {
       if (error instanceof ClientError) {
         return error
       }
-      
+
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.'
