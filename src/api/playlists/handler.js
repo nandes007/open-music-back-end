@@ -11,6 +11,7 @@ class PlaylistsHandler {
     this.postSongPlaylistHandler = this.postSongPlaylistHandler.bind(this)
     this.getSongsByPlaylistIdHandler = this.getSongsByPlaylistIdHandler.bind(this)
     this.deleteSongPlaylistByIdHandler = this.deleteSongPlaylistByIdHandler.bind(this)
+    this.getPlaylistActivitiesHandler = this.getPlaylistActivitiesHandler.bind(this)
   }
 
   async postPlaylistHandler (request, h) {
@@ -60,8 +61,8 @@ class PlaylistsHandler {
       const { id } = request.params
       const { id: credentialId } = request.auth.credentials
 
-      await this._service.verifyPlaylistOwner(id, credentialId)
-      await this._service.deletePlaylistById(id)
+      await this._service.verifyPlaylistAccess(id, credentialId)
+      await this._service.deletePlaylistById(id, credentialId)
 
       return {
         status: 'success',
@@ -92,6 +93,7 @@ class PlaylistsHandler {
       await this._service.verifyPlaylistOwner(playlistId, credentialId)
       await this._service.isSongExist(songId)
       const songPlaylistId = await this._service.addPlaylistByPlaylistId(playlistId, songId)
+      await this._service.addPaylistHistory(playlistId, songId, credentialId, 'add')
 
       const response = h.response({
         status: 'success',
@@ -155,12 +157,13 @@ class PlaylistsHandler {
   async deleteSongPlaylistByIdHandler (request, h) {
     try {
       this._validator.validateSongPlaylistPayload(request.payload)
-      const { id: playlistId } = request.params
       const { songId } = request.payload
+      const { id: playlistId } = request.params
       const { id: credentialId } = request.auth.credentials
 
       await this._service.verifyPlaylistOwner(playlistId, credentialId)
       await this._service.deleteSongFromPlaylistById(playlistId, songId)
+      await this._service.addPaylistHistory(playlistId, songId, credentialId, 'delete')
 
       return {
         status: 'success',
@@ -178,6 +181,23 @@ class PlaylistsHandler {
       response.code(500)
       console.error(error)
       return response
+    }
+  }
+
+  async getPlaylistActivitiesHandler (request) {
+    const { id } = request.params
+    const { id: credentialId } = request.auth.credentials
+
+    await this._service.verifyPlaylistAccess(id, credentialId)
+    const playlistId = await this._service.isPlaylistExist(id)
+    const activities = await this._service.getPlaylistActivities(id)
+
+    return {
+      status: 'success',
+      data: {
+        playlistId,
+        activities
+      }
     }
   }
 }

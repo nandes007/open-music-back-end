@@ -17,12 +17,15 @@ class CollaborationsHandler {
       const { playlistId, userId } = request.payload
 
       await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId)
+      await this._collaborationsService.isUserExist(userId)
       const collaborationId = await this._collaborationsService.addCollaboration(playlistId, userId)
 
       const response = h.response({
         status: 'success',
         message: 'Kolaborasi berhasil ditambahkan',
-        data: collaborationId
+        data: {
+          collaborationId
+        }
       })
       response.code(201)
       return response
@@ -47,7 +50,7 @@ class CollaborationsHandler {
       const { id: credentialId } = request.auth.credentials
       const { playlistId, userId } = request.payload
 
-      await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId)
+      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId)
       await this._collaborationsService.deleteCollaboration(playlistId, userId)
 
       return {
