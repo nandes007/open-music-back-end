@@ -1,11 +1,13 @@
 const albumsModel = ({
   id,
   name,
-  year
+  year,
+  cover
 }) => ({
   id,
   name,
-  year
+  year,
+  cover
 })
 
 const playlistsModel = ({

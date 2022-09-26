@@ -1,8 +1,4 @@
-/* eslint-disable camelcase */
-
 const currentYear = new Date().getFullYear()
-
-exports.shorthands = undefined
 
 exports.up = pgm => {
   pgm.sql(`INSERT INTO albums(id, name, year, created_at, updated_at) VALUES ('old_albums', 'old_albums', ${currentYear}, ${currentYear}, ${currentYear})`)

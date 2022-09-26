@@ -28,8 +28,18 @@ const collaborations = require('./api/collaborations')
 const CollaborationsService = require('./services/postgres/CollaborationsService')
 const CollaborationsValidator = require('./validator/collaborations')
 
+const _exports = require('./api/exports')
+const ProducerService = require('./services/rabbitmq/ProducerService')
+const ExportsValidator = require('./validator/exports')
+
+const StorageService = require('./services/S3/StorageService')
+
+const CacheService = require('./services/redis/CacheService')
+
 const init = async () => {
-  const albumsService = new AlbumsService()
+  const cacheService = new CacheService()
+  const albumsService = new AlbumsService(cacheService)
+  const storageService = new StorageService()
   const songsService = new SongsService()
   const usersService = new UsersService()
   const authenticationsService = new AuthenticationsService()
@@ -73,7 +83,8 @@ const init = async () => {
       plugin: albums,
       options: {
         service: albumsService,
-        validator: AlbumsValidator
+        validator: AlbumsValidator,
+        storageService
       }
     },
     {
@@ -112,6 +123,14 @@ const init = async () => {
         collaborationsService,
         playlistsService,
         validator: CollaborationsValidator
+      }
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        validator: ExportsValidator,
+        playlistsService
       }
     }
   ])

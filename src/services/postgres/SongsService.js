@@ -13,8 +13,8 @@ class SongsService {
     const createdAt = new Date().toISOString()
 
     const query = {
-      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-      values: [id, title, year, genre, performer, duration, albumId, createdAt, createdAt]
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $8) RETURNING id',
+      values: [id, title, year, genre, performer, duration, albumId, createdAt]
     }
 
     const result = await this._pool.query(query)
@@ -27,30 +27,29 @@ class SongsService {
   }
 
   async getSongs (title, performer) {
-    let result = []
     let query = {}
     if (title && performer) {
       query = {
         text: 'SELECT id, title, performer FROM songs WHERE title ILIKE $1 AND performer ILIKE $2',
-        values: ['%' + title + '%', '%' + performer + '%']
+        values: [`%${title}%`, `%${performer}%`]
       }
     } else if (title) {
       query = {
         text: 'SELECT id, title, performer FROM songs WHERE title ILIKE $1',
-        values: ['%' + title + '%']
+        values: [`%${title}%`]
       }
     } else if (performer) {
       query = {
         text: 'SELECT id, title, performer FROM songs WHERE performer ILIKE $1',
-        values: ['%' + performer + '%']
+        values: [`%${performer}%`]
       }
     } else {
       query = {
         text: 'SELECT id, title, performer FROM songs'
       }
     }
-    result = await this._pool.query(query)
-    return result.rows
+    const { rows } = await this._pool.query(query)
+    return rows
   }
 
   async getSongById (id) {
